@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Document</title>
+  <style>
+    /* The page is intentionally blank until the secret key sequence is entered. */
+    * { box-sizing: border-box; }
+    html, body { width: 100%; min-height: 100%; margin: 0; }
+    body { background: #fff; font-family: system-ui, sans-serif; }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.72);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 220ms ease, visibility 220ms ease;
+    }
+    .overlay.is-open { opacity: 1; visibility: visible; }
+    .menu {
+      width: min(100%, 520px);
+      padding: clamp(22px, 6vw, 36px);
+      border: 1px solid #343434;
+      border-radius: 16px;
+      background: #171717;
+      color: #f5f5f5;
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+    }
+    .menu h1 { margin: 0 0 20px; font-size: 1.5rem; font-weight: 650; }
+    .games { display: grid; grid-template-columns: repeat(auto-fit, minmax(125px, 1fr)); gap: 12px; }
+    .game-button {
+      min-height: 58px;
+      padding: 14px 16px;
+      border: 1px solid #4a4a4a;
+      border-radius: 10px;
+      background: #252525;
+      color: inherit;
+      font: inherit;
+      font-size: 1rem;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .game-button:hover, .game-button:focus-visible { background: #343434; outline: 2px solid #a7c7ff; outline-offset: 2px; }
+    .hint { margin: 18px 0 0; color: #bdbdbd; font-size: 0.875rem; }
+    @media (prefers-reduced-motion: reduce) { .overlay { transition: none; } }
+  </style>
+</head>
+<body>
+  <!-- Hidden until the sequence is entered. Keep the game list easy to edit. -->
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <main class="menu" role="dialog" aria-modal="true" aria-label="Games menu">
+      <h1>Games</h1>
+      <div class="games">
+        <!-- To add or replace a game, edit this list. Paste a real game's embed where noted. -->
+        <button class="game-button" type="button">
+          2048
+          <!-- Paste the 2048 game's embed here. -->
+        </button>
+        <button class="game-button" type="button">
+          Flappy
+          <!-- Paste the Flappy game's embed here. -->
+        </button>
+        <button class="game-button" type="button">
+          Tetris
+          <!-- Paste the Tetris game's embed here. -->
+        </button>
+      </div>
+      <p class="hint">Press Escape to close.</p>
+    </main>
+  </div>
+  <script>
+    // Konami-style unlock: Up, Up, Down, Down, Left, Right, Left, Right, B, A.
+    const secretSequence = [
+      'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown',
+      'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'
+    ];
+    let sequencePosition = 0;
+    const overlay = document.getElementById('overlay');
+
+    function openMenu() {
+      overlay.classList.add('is-open');
+      overlay.setAttribute('aria-hidden', 'false');
+    }
+    function closeMenu() {
+      overlay.classList.remove('is-open');
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeMenu();
+        sequencePosition = 0;
+        return;
+      }
+
+      const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+      if (key === secretSequence[sequencePosition]) {
+        sequencePosition += 1;
+        if (sequencePosition === secretSequence.length) {
+          openMenu();
+          sequencePosition = 0;
+        }
+      } else {
+        // If a fresh first key was pressed, keep it as the start of the sequence.
+        sequencePosition = key === secretSequence[0] ? 1 : 0;
+      }
+    });
+  </script>
+</body>
+</html>
